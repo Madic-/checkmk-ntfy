@@ -1,0 +1,170 @@
+#!/bin/bash
+# Push Notifications (using ntfy.sh)
+
+DEBUG=0
+
+## Exit if command fails on non-zero status code and exit on empty variable
+set -eu
+## Change script return code to the last command to exit with a non-zero status
+set -o pipefail
+
+## Log every debug output into file
+if [ "$DEBUG" -eq 1 ]; then
+    LOG="$HOME/var/log/ntfy.notify.log"
+    [[ -f "$LOG" ]] || touch "$LOG"
+    set -x
+    exec &>>"$LOG"
+    echo -e "\n\n##########################\n\n"
+fi
+
+## Crit Service Debug Vars
+#NOTIFY_WHAT="SERVICE"
+#NOTIFY_HOSTNAME="HOST"
+#NOTIFY_SERVICEDESC="NOTIFICATION TEST"
+#NOTIFY_NOTIFICATIONTYPE="PROBLEM"
+#NOTIFY_HOSTSTATE="UP"
+#NOTIFY_SERVICEOUTPUT="Status: OK, Signal power: -25.69 dBm (warn/crit below -11.90 dBm/-15.90 dBm)(!!)"
+#NOTIFY_LONGSERVICEOUTPUT="Status: OK\nSignal power: -25.69 dBm (warn/crit below -11.90 dBm/-15.90 dBm)(!!)"
+#NOTIFY_SERVICEPERFDATA="signal_power_dbm=-25.686362;0;3.000082;;"
+#NOTIFY_HOSTURL="/check_mk/index.py?start_url=%2Fcmk%2Fcheck_mk%2Fview.py%3Fhost%3DHOST%26site%3Dcmk%26view_name%3Dhost"
+#NOTIFY_SERVICE_SL=30
+#NOTIFY_SERVICEACKAUTHOR=${NOTIFY_SERVICEACKAUTHOR:-""}
+#NOTIFY_SHORTDATETIME="2021-08-26 10:00:00"
+#NOTIFY_OMD_SITE=cmk
+#NOTIFY_SERVICEURL=test
+
+## Down Host Debug Vars
+#NOTIFY_WHAT="HOST"
+#NOTIFY_HOSTNAME="HOST"
+#NOTIFY_HOSTSTATE="DOWN TEST"
+#NOTIFY_HOSTOUTPUT="DOWN"
+#NOTIFY_LONGHOSTOUTPUT=
+#NOTIFY_HOSTPERFDATA=
+#NOTIFY_SERVICEDESC=
+#NOTIFY_NOTIFICATIONTYPE="PROBLEM"
+#NOTIFY_HOST_SL=30
+#NOTIFY_HOSTACKAUTHOR=${NOTIFY_HOSTACKAUTHOR:-""}
+#NOTIFY_SHORTDATETIME="2021-08-26 10:00:00"
+#NOTIFY_OMD_SITE=cmk
+#NOTIFY_HOSTURL=test
+#NOTIFY_HOST_ADDRESS_4=172.16.0.1
+
+## Do not change
+NOTIFY_PARAMETER_NTFY_USERNAME=${NOTIFY_PARAMETER_NTFY_USERNAME:-""}
+NOTIFY_PARAMETER_NTFY_PASSWORD=${NOTIFY_PARAMETER_NTFY_PASSWORD:-""}
+NOTIFY_PARAMETER_NTFY_CMK_URL=${NOTIFY_PARAMETER_NTFY_CMK_URL:-"https://cmk.example.com"}
+NOTIFY_PARAMETER_NTFY_CMK_USERNAME=${NOTIFY_PARAMETER_NTFY_CMK_USERNAME:-""}
+NOTIFY_PARAMETER_NTFY_CMK_PASSWORD=${NOTIFY_PARAMETER_NTFY_CMK_PASSWORD:-""}
+
+# Create Messagebody
+if [ "$NOTIFY_WHAT" == "SERVICE" ]; then
+    if [ -n "$NOTIFY_SERVICEACKAUTHOR" ] && [ -n "$NOTIFY_SERVICEACKCOMMENT" ]; then
+        SERVICEOUT="
+Acknowledge=${NOTIFY_SERVICEACKCOMMENT} (${NOTIFY_SERVICEACKAUTHOR})"
+    fi
+    if [ -n "$NOTIFY_SERVICEOUTPUT" ]; then
+        SERVICEOUT="${SERVICEOUT:-""}
+Service Output=${NOTIFY_SERVICEOUTPUT}"
+    fi
+    #if [ -n "$NOTIFY_LONGSERVICEOUTPUT" ]; then
+    #    ## Remove line breaks from string
+    #    NOTIFY_LONGSERVICEOUTPUT=${NOTIFY_LONGSERVICEOUTPUT//"\n"/, }
+    #    SERVICEOUT="${SERVICEOUT}
+    #    Detail Service Output=${NOTIFY_LONGSERVICEOUTPUT}"
+    #fi
+
+    TITLE="${NOTIFY_HOSTNAME} - ${NOTIFY_SERVICEDESC}"
+    MESSAGE="${NOTIFY_NOTIFICATIONTYPE}
+Hoststate=${NOTIFY_HOSTSTATE}${SERVICEOUT}
+"
+
+    # Link to Service
+    ACTIONGOTOTEXT="Go to service"
+    ACTIONGOTOURL="${NOTIFY_PARAMETER_NTFY_CMK_URL}/${NOTIFY_OMD_SITE}${NOTIFY_SERVICEURL}"
+
+    # Link to Acknowledge Service
+    ACTIONACKTEXT="Acknowledge problem"
+    ACTIONACKURL="${NOTIFY_PARAMETER_NTFY_CMK_URL}/${NOTIFY_OMD_SITE}/check_mk/api/1.0/domain-types/acknowledge/collections/service"
+    ACTIONACKDATA="{\\\"acknowledge_type\\\":\\\"service\\\",\\\"comment\\\":\\\"Acknowledged via ntfy\\\",\\\"host_name\\\":\\\"${NOTIFY_HOSTNAME}\\\",\\\"notify\\\":true,\\\"persistent\\\":false,\\\"service_description\\\":\\\"${NOTIFY_SERVICEDESC}\\\",\\\"sticky\\\": true}"
+elif [ "$NOTIFY_WHAT" == "HOST" ]; then
+    if [ -n "$NOTIFY_HOSTACKAUTHOR" ] && [ -n "$NOTIFY_HOSTACKCOMMENT" ]; then
+        SERVICEOUT="
+Acknowledge=${NOTIFY_HOSTACKCOMMENT} (${NOTIFY_HOSTACKAUTHOR})"
+    fi
+    if [ -n "$NOTIFY_HOSTOUTPUT" ]; then
+        SERVICEOUT="${SERVICEOUT:-""}
+Service Output=${NOTIFY_HOSTOUTPUT}"
+    fi
+    #if [ -n "$NOTIFY_LONGHOSTOUTPUT" ]; then
+    #    ## Remove line breaks from string
+    #    NOTIFY_LONGHOSTOUTPUT=${NOTIFY_LONGHOSTOUTPUT//"\n"/, }
+    #    SERVICEOUT="${SERVICEOUT}
+    #    Detail Service Output=${NOTIFY_LONGHOSTOUTPUT}"
+    #fi
+
+    TITLE="${NOTIFY_HOSTNAME} (${NOTIFY_HOST_ADDRESS_4}) ${NOTIFY_HOSTSTATE}"
+    MESSAGE="${NOTIFY_NOTIFICATIONTYPE}
+Hoststate=${NOTIFY_HOSTSTATE}${SERVICEOUT}
+"
+
+    # Link to Host
+    ACTIONGOTOTEXT="Go to host"
+    ACTIONGOTOURL="${NOTIFY_PARAMETER_NTFY_CMK_URL}/${NOTIFY_OMD_SITE}${NOTIFY_HOSTURL}"
+
+    # Link to Acknowledge Host
+    ACTIONACKTEXT="Acknowledge problem"
+    ACTIONACKURL="${NOTIFY_PARAMETER_NTFY_CMK_URL}/${NOTIFY_OMD_SITE}/check_mk/api/1.0/domain-types/acknowledge/collections/host"
+    ACTIONACKDATA="{\\\"acknowledge_type\\\":\\\"host\\\",\\\"comment\\\":\\\"Acknowledged via ntfy\\\",\\\"host_name\\\":\\\"${NOTIFY_HOSTNAME}\\\",\\\"notify\\\":true,\\\"persistent\\\": false,\\\"sticky\\\":true}"
+else
+    MESSAGE="Unknown Notification Event"
+fi
+# Add Site and Shortdate to Message
+MESSAGE+="${NOTIFY_SHORTDATETIME} | Site: ${OMD_SITE}"
+
+# Set Acknowledge action for ntfy
+NTFY_HTTP_ACK_TEMPLATE="; http, ${ACTIONACKTEXT}, ${ACTIONACKURL}, method=POST, headers.Authorization=Bearer ${NOTIFY_PARAMETER_NTFY_CMK_USERNAME} ${NOTIFY_PARAMETER_NTFY_CMK_PASSWORD}, headers.Content-Type=application/json, headers.Accept= */*, body=\"${ACTIONACKDATA}\", clear=true"
+
+# Set Priority and Tag
+case "$MESSAGE" in
+*"PROBLEM"*)
+    PRIO=4
+    TAG="bangbang"
+    NTFY_ENABLE_HTTP_ACK_TEMPLATE="${NTFY_HTTP_ACK_TEMPLATE}"
+    ;;
+*"ACKNOWLEDGEMENT"*)
+    PRIO=2
+    TAG="hammer_and_pick"
+    NTFY_ENABLE_HTTP_ACK_TEMPLATE=""
+    ;;
+*"RECOVERY"*)
+    PRIO=3
+    TAG="white_check_mark"
+    NTFY_ENABLE_HTTP_ACK_TEMPLATE=""
+    ;;
+*"UNKNOWN"*)
+    PRIO=2
+    TAG="interrobang"
+    NTFY_ENABLE_HTTP_ACK_TEMPLATE="${NTFY_HTTP_ACK_TEMPLATE}"
+    ;;
+*"CUSTOM"*)
+    PRIO=1
+    TAG="arrow_right_hook"
+    NTFY_ENABLE_HTTP_ACK_TEMPLATE=""
+    ;;
+esac
+
+# Set credentials if username and password are set
+if [ -n "${NOTIFY_PARAMETER_NTFY_USERNAME}" ] && [ -n "${NOTIFY_PARAMETER_NTFY_PASSWORD}" ]; then
+    NTFY_CREDS="-u ${NOTIFY_PARAMETER_NTFY_USERNAME}:${NOTIFY_PARAMETER_NTFY_PASSWORD}"
+else
+    NTFY_CREDS=""
+fi
+
+# Send message to ntfy.sh server
+curl -s ${NTFY_CREDS} \
+    -H "Title: ${TITLE}" \
+    -H "Priority: ${PRIO}" \
+    -H "Tags: ${TAG}" \
+    -H "Actions: view, ${ACTIONGOTOTEXT}, ${ACTIONGOTOURL}, clear=true${NTFY_ENABLE_HTTP_ACK_TEMPLATE}" \
+    -d "${MESSAGE}" \
+    "${NOTIFY_PARAMETER_NTFY_SERVER}"/"${NOTIFY_PARAMETER_NTFY_TOPIC}" >/dev/null
