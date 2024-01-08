@@ -3,13 +3,13 @@
 This [CheckMK](https://checkmk.com/) notification scripts sends notifications to [ntfy.sh](https://ntfy.sh/) or a self hosted ntfy instance.
 It adds a link to the CheckMK host/service and let's you acknowledge the host/service problem directly from the notification.
 
-<img src="./images/service_alert.png" width="500" alt="Service alert">
+<img src="./images/service_alert.png" width="600" alt="Service alert">
 
-<img src="./images/acknowledge_service.png" width="500" alt="Acknowledged service problem">
+<img src="./images/acknowledge_service.png" width="600" alt="Acknowledged service problem">
 
-<img src="./images/host_alert.png" width="500" alt="Host alert">
+<img src="./images/host_alert.png" width="600" alt="Host alert">
 
-<img src="./images/acknowledge_host.png" width="500" alt="Acknowledged host problem">
+<img src="./images/acknowledge_host.png" width="600" alt="Acknowledged host problem">
 
 ## Installation
 
@@ -107,17 +107,17 @@ The name for the notification method is "Push Notifications (using ntfy.sh)".
 
 Every script parameter is configurable via the notification configuration in CheckMK.
 
-<img src="./images/notification_configuration_parameters.png" width="500" alt="checkmk ntfy script parameters">
+<img src="./images/notification_configuration_parameters.png" width="600" alt="checkmk ntfy script parameters">
 
 It does not support notification bulking.
 
 I recommend to configure only one user for the contact selection. Else it generates a notification per contact. So if a host / service has two contacts associated, it will generate two notifications.
 
-<img src="./images/notification_configuration_contacts.png" width="500" alt="checkmk ntfy contacts configuration">
+<img src="./images/notification_configuration_contacts.png" width="600" alt="checkmk ntfy contacts configuration">
 
 Example condition configuration:
 
-<img src="./images/notification_configuration_conditions.png" width="500" alt="checkmk ntfy conditions">
+<img src="./images/notification_configuration_conditions.png" width="600" alt="checkmk ntfy conditions">
 
 
 
