@@ -8,6 +8,6 @@ dist({
     'download_url': 'https://github.com/Madic-/checkmk-ntfy',
     'name': 'ntfy',
     'title': 'ntfy.sh notification script',
-    'version': '1.0',
+    'version': '1.0.0',
     'version.min_required': '2.0.0',
 })
