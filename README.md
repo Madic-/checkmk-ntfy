@@ -31,7 +31,7 @@ curl -s https://api.github.com/repos/Madic-/checkmk-ntfy/releases/latest | grep 
 Install extension
 
 ```bash
-mkp add ntfy-1.0.mkp
+mkp add ntfy-1.0.0.mkp
 ```
 
 Enable extension
