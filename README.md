@@ -24,7 +24,8 @@ su - mysite
 Download the package from the release page of this repository
 
 ```bash
-wget https://github.com/Madic-/checkmk-ntfy/releases
+# Automatic get and download the latest release
+curl -s https://api.github.com/repos/Madic-/checkmk-ntfy/releases/latest | grep "browser_download_url" | cut -d : -f 2,3 | tr -d \" | wget -qi -
 ```
 
 Install extension
