@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 
+import os
 from mkp import dist
+
+# Get Version from Git Tag
+version = os.getenv('GITHUB_REF_NAME')
 
 dist({
     'author': 'Michael Neese',
@@ -8,6 +12,6 @@ dist({
     'download_url': 'https://github.com/Madic-/checkmk-ntfy',
     'name': 'ntfy',
     'title': 'ntfy.sh notification script',
-    'version': '1.0.0',
+    'version': version,
     'version.min_required': '2.0.0',
 })
