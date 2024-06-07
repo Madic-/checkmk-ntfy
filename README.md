@@ -1,6 +1,6 @@
 # CheckMK ntfy notification
 
-This [CheckMK](https://checkmk.com/) notification scripts sends notifications to [ntfy.sh](https://ntfy.sh/) or a self hosted ntfy instance.
+This [CheckMK](https://checkmk.com/) notification script sends notifications to [ntfy.sh](https://ntfy.sh/) or a self hosted ntfy instance.
 It adds a link to the CheckMK host/service and let's you acknowledge the host/service problem directly from the notification.
 
 <img src="./images/service_alert.png" width="600" alt="Service alert">
@@ -31,7 +31,7 @@ curl -s https://api.github.com/repos/Madic-/checkmk-ntfy/releases/latest | grep 
 Install extension
 
 ```bash
-mkp add ntfy-1.0.0.mkp
+mkp add ntfy-1.1.0.mkp
 ```
 
 Enable extension
@@ -119,6 +119,3 @@ I recommend to configure only one user for the contact selection. Else it genera
 Example condition configuration:
 
 <img src="./images/notification_configuration_conditions.png" width="600" alt="checkmk ntfy conditions">
-
-
-
