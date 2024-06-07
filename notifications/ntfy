@@ -55,9 +55,10 @@ NOTIFY_PARAMETER_NTFY_PASSWORD=${NOTIFY_PARAMETER_NTFY_PASSWORD:-""}
 NOTIFY_PARAMETER_NTFY_CMK_URL=${NOTIFY_PARAMETER_NTFY_CMK_URL:-"https://cmk.example.com"}
 NOTIFY_PARAMETER_NTFY_CMK_USERNAME=${NOTIFY_PARAMETER_NTFY_CMK_USERNAME:-""}
 NOTIFY_PARAMETER_NTFY_CMK_PASSWORD=${NOTIFY_PARAMETER_NTFY_CMK_PASSWORD:-""}
+NOTIFY_STATETYPE=${NOTIFY_PARAMETER_NTFY_STATETYPE:-HARD}
 
 # Create Messagebody
-if [ "$NOTIFY_WHAT" == "SERVICE" ]; then
+if [ "$NOTIFY_WHAT" == "SERVICE" ] && [ "$NOTIFY_SERVICESTATETYPE" == "$NOTIFY_STATETYPE" ]; then
     if [ -n "$NOTIFY_SERVICEACKAUTHOR" ] && [ -n "$NOTIFY_SERVICEACKCOMMENT" ]; then
         SERVICEOUT="
 Acknowledge=${NOTIFY_SERVICEACKCOMMENT} (${NOTIFY_SERVICEACKAUTHOR})"
@@ -86,7 +87,7 @@ Hoststate=${NOTIFY_HOSTSTATE}${SERVICEOUT}
     ACTIONACKTEXT="Acknowledge problem"
     ACTIONACKURL="${NOTIFY_PARAMETER_NTFY_CMK_URL}/${NOTIFY_OMD_SITE}/check_mk/api/1.0/domain-types/acknowledge/collections/service"
     ACTIONACKDATA="{\\\"acknowledge_type\\\":\\\"service\\\",\\\"comment\\\":\\\"Acknowledged via ntfy\\\",\\\"host_name\\\":\\\"${NOTIFY_HOSTNAME}\\\",\\\"notify\\\":true,\\\"persistent\\\":false,\\\"service_description\\\":\\\"${NOTIFY_SERVICEDESC}\\\",\\\"sticky\\\": true}"
-elif [ "$NOTIFY_WHAT" == "HOST" ]; then
+elif [ "$NOTIFY_WHAT" == "HOST" ] && [ "$NOTIFY_HOSTSTATETYPE" == "$NOTIFY_STATETYPE" ]; then
     if [ -n "$NOTIFY_HOSTACKAUTHOR" ] && [ -n "$NOTIFY_HOSTACKCOMMENT" ]; then
         SERVICEOUT="
 Acknowledge=${NOTIFY_HOSTACKCOMMENT} (${NOTIFY_HOSTACKAUTHOR})"
