@@ -94,13 +94,5 @@ class NotificationParameterntfy(NotificationParameter):
                      default_value="",
                      allow_empty=True,
                  )),
-                ("ntfy_statetype",
-                 TextUnicode(
-                     title=_("Notify on Statetype (optional)"),
-                     help=_("Allowed values: HARD / SOFT. Notifies on Hard- or Softstate. Defaults to HARD."),
-                     size=64,
-                     default_value="HARD",
-                     allow_empty=True,
-                 )),
             ],
         )
