@@ -119,3 +119,7 @@ I recommend to configure only one user for the contact selection. Else it genera
 Example condition configuration:
 
 <img src="./images/notification_configuration_conditions.png" width="600" alt="checkmk ntfy conditions">
+
+## pre-commit hooks
+
+This repository uses [pre-commit](https://pre-commit.com/) to manage pre-commit hooks.
